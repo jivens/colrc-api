@@ -1,0 +1,28 @@
+cd colrc-api
+npm init
+
+I responded to the prompts like so:
+package name: (colrc-api)
+version: (1.0.0)
+description: Back End GraphQl server for the COLRC
+entry point: (index.js)
+test command:
+git repository: (https://github.com/jivens/colrc-api.git)
+keywords:
+author:
+license: (ISC)
+
+npm install express
+npm install nodemon -g
+
+now edit files as you need them, such as:
+app.js
+
+You can run the application with:
+nodemon app
+
+Running the application with nodemon allows edits to immediately persist to the
+running application as files are saved.
+
+npm install graphql express-graphql
+npm install lodash
