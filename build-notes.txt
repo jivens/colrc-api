@@ -1,3 +1,14 @@
+// Tutorial - Amit Shukla Angular 6 NodeJS MYSQL CRUD Operation with
+// GraphQL JWT Auth token -- YouTube
+// Also utilizes Sequelize
+// github - AmitXShukla
+
+// MERN - MySQL + Express + React + NodeJS - Login
+
+// Authentication and Error Handling in GraphQL - Andrew Rhyne
+
+// GraphQL Subscriptions: Full Stack - Rob Zhu
+
 cd colrc-api
 npm init
 
