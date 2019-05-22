@@ -1,18 +1,32 @@
 const graphql = require('graphql');
-const { 
-	GraphQLObjectType, 
-	GraphQLString, 
-	GraphQLSchema, 
-	GraphQLID, 
-	GraphQLInt,
-	GraphQLList,
-	GraphQLNonNull
-	} = graphql;
-//const _ = require('lodash'); 
 const {
-	Root,
-	User
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLSchema,
+  GraphQLID,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLNonNull
+} = graphql;
+//const _ = require('lodash');
+const { // define mysql connectors
+  Root,
+  User
 } = require('../connectors/mysqlDB');
+
+const staticServerAddress = "http://lasrv01.ipfw.edu/";
+
+const dirPrefixes = {
+  typedImage: "COLRC/texts/",
+  typedPdf: "COLRC/texts/",
+  metaDataTyped: "COLRC/texts/metadata/",
+  handImage: "COLRC/texts/",
+  handPdf: "COLRC/texts/",
+  metaDataHand: "COLRC/texts/metadata/",
+  pubEnglImage: "COLRC/texts/",
+  pubEnglPdf: "COLRC/texts/",
+  audio: "audio/"
+};
 
 const RootType = new GraphQLObjectType({
   name: 'Root',
@@ -23,7 +37,13 @@ const RootType = new GraphQLObjectType({
     salish: { type: GraphQLString },
     nicodemus: { type: GraphQLString },
     english: { type: GraphQLString }
-    })
+    // user: {
+    //   type: UserType,
+    //   resolve(parent, args) {
+    //     return _.find(users, { id: parent.userId });
+    //   }
+    // }
+  })
 });
 
 const UserType = new GraphQLObjectType({
@@ -36,7 +56,13 @@ const UserType = new GraphQLObjectType({
     email: { type: GraphQLString },
     password: { type: GraphQLString },
     roles: { type: GraphQLString }
-    })
+    // roots: {
+    //   type: new GraphQLList(RootType),
+    //   resolve(parent, args) {
+    //     return _.filter(roots, { userId: parent.id });
+    //   }
+    // }
+  })
 });
 
 const BaseQuery = new GraphQLObjectType({
@@ -46,30 +72,28 @@ const BaseQuery = new GraphQLObjectType({
       type: RootType,
       args: { id: {type: GraphQLID } },
       resolve(parent, args) {
-        console.log(typeof(args.id));
-        return Root.findOne ({ where: {id: args.id} });
+      	return Root.findOne({ where: { id: args.id } });
       }
     },
     user: {
       type: UserType,
-      args: { id: {type: GraphQLID} },
+      args: { id: {type: GraphQLID } },
       resolve(parent, args) {
-    	return User.findOne ({ where: {id: args.id} });
+        return User.findOne({ where: { id: args.id } });
       }
     },
     roots: {
-    	type: new GraphQLList(RootType),
-    	resolve(parent, args) {
-			//return roots;
-			return Root.findAll({});
-    	}
+      type: new GraphQLList(RootType),
+      resolve(parent, args) {
+        return Root.findAll({});
+      }
     },
     users: {
-		type: new GraphQLList(UserType),
-		resolve(parent, args) {
-			//return users;
-			return User.findAll({});
-		}
+      type: new GraphQLList(UserType),
+      resolve(parent, args) {
+        //return authors;
+        return User.findAll({});
+      }
     }
   }
 });
@@ -120,7 +144,8 @@ const Mutation = new GraphQLObjectType({
 			}
 		}
 	}
-})
+});
+
 module.exports = new GraphQLSchema({
   query: BaseQuery,
   mutation: Mutation
