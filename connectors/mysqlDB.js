@@ -49,7 +49,7 @@ const Root = sequelize.define('root', {
 
 const User = sequelize.define('user', {
   first: { type: Sequelize.STRING },
-  last: { type: Sequelize.INTEGER },
+  last: { type: Sequelize.STRING },
   username: { type: Sequelize.STRING },
   email: { type: Sequelize.STRING },
   password: { type: Sequelize.STRING },
