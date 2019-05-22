@@ -1,141 +1,127 @@
-const graphql = require("graphql");
-const { GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql;
-const _ = require("lodash");
-
-//dummy data
-var roots = [
-  {
-    id: '1',
-    root: '√a',
-    number: '1',
-    salish: "a",
-    nicodemus: "a",
-    english: "† hello. (gr.)",
-  },
-  {
-    id: '2',
-    root: '√a',
-    number: '2',
-    salish: 'a',
-    nicodemus: 'a?',
-    english: 'so. (lit. Is that so?), (adv.)',
-  },
-  {
-    id: '3',
-    root: '√a',
-    number: '3',
-    salish: "a·",
-    nicodemus: "aaaa...!",
-    english: "cut out, knock off!, quit, stop. (lit. Cut it out!, Knock it off, quit it, Stop it!), (imper.)",
-  },
-  {
-    id: '4',
-    root: '√a',
-    number: '4',
-    salish: "aye",
-    nicodemus: "aye",
-    english: "hey. (adv.)",
-  },
-  {
-    id: '5',
-    root: '√bc',
-    number: '1',
-    salish: "buc",
-    nicodemus: "buts",
-    english: "† boots. (n.)",
-  },
-  {
-    id: '6',
-    root: '√bc',
-    number: '2',
-    salish: "ec+búc+buc=šn",
-    nicodemus: "etsbutsbutsshn",
-    english: "// boots (to be wearing...). ((lit. He is wearing boots), n.)",
-  },
-  {
-    id: '7',
-    root: '√bc',
-    number: '3',
-    salish: "s+búc+buc=šn",
-    nicodemus: "sbutsbutsshn",
-    english: "boot. ((lit. a borrowed root), n.)",
-  },
-  {
-    id: '8',
-    root: '√bc',
-    number: '4',
-    salish: "s+búc+buc=šn+mš",
-    nicodemus: "sbutsbutsshnmsh",
-    english: "rubber boots (putting on...). (vt, pl.n.)",
-  },
-  {
-    id: '9',
-    root: '√bl',
-    number: '1',
-    salish: "bu·lí",
-    nicodemus: "buuli",
-    english: "† bull. (n.)",
-  },
-  {
-    id: '10',
-    root: '√bm 1',
-    number: '1',
-    salish: "bam",
-    nicodemus: "bam",
-    english: "† go (...fast and far), speeded (be...), be versatile. ((stem), vi.)",
-  },
-  {
-    id: '11',
-    root: '√bm 1',
-    number: '2',
-    salish: "bam",
-    nicodemus: "bam",
-    english: "intoxicated. ((stem), vi.)",
-  },
-  {
-    id: '12',
-    root: '√bm 1',
-    number: '7',
-    salish: "niʔ+b[a]m+p=aw'es",
-    nicodemus: "ni'bmpa'wes",
-    english: "// orgy. ((lit. there is speeding or intoxication among them), n.)",
-  },
-  {
-    id: '13',
-    root: "√dlq'ʷ",
-    number: '7',
-    salish: "tiʔxʷ+eɫ+n+dol+dolq'ʷ+t=íl'š+n",
-    nicodemus: "ti'khweɫndoldolq'wti'lshn",
-    english: "confirmed. ((lit. He gained strength, he received the rite of confirmation), vi.)",
-  }
-];
+const graphql = require('graphql');
+const { 
+	GraphQLObjectType, 
+	GraphQLString, 
+	GraphQLSchema, 
+	GraphQLID, 
+	GraphQLInt,
+	GraphQLList,
+	GraphQLNonNull
+	} = graphql;
+//const _ = require('lodash'); 
+const {
+	Root,
+	User
+} = require('../connectors/mysqlDB');
 
 const RootType = new GraphQLObjectType({
   name: 'Root',
   fields: () => ({
-    id: { type: GraphQLString },
+    id: { type: GraphQLID },
     root: { type: GraphQLString },
-    number: { type: GraphQLString },
+    number: { type: GraphQLInt },
     salish: { type: GraphQLString },
     nicodemus: { type: GraphQLString },
     english: { type: GraphQLString }
     })
 });
 
-const RootQuery = new GraphQLObjectType({
-  name: 'RootQueryType',
+const UserType = new GraphQLObjectType({
+  name: 'User',
+  fields: () => ({
+    id: { type: GraphQLID },
+    first: { type: GraphQLString },
+    last: { type: GraphQLString },
+    username: { type: GraphQLString },
+    email: { type: GraphQLString },
+    password: { type: GraphQLString },
+    roles: { type: GraphQLString }
+    })
+});
+
+const BaseQuery = new GraphQLObjectType({
+  name: 'BaseQueryType',
   fields: {
     root: {
       type: RootType,
-      args: {id: { type: GraphQLString }},
+      args: { id: {type: GraphQLID } },
       resolve(parent, args) {
-        // code to get data from the db
-        return _.find(roots, { id: args.id });
+        console.log(typeof(args.id));
+        return Root.findOne ({ where: {id: args.id} });
       }
+    },
+    user: {
+      type: UserType,
+      args: { id: {type: GraphQLID} },
+      resolve(parent, args) {
+    	return User.findOne ({ where: {id: args.id} });
+      }
+    },
+    roots: {
+    	type: new GraphQLList(RootType),
+    	resolve(parent, args) {
+			//return roots;
+			return Root.findAll({});
+    	}
+    },
+    users: {
+		type: new GraphQLList(UserType),
+		resolve(parent, args) {
+			//return users;
+			return User.findAll({});
+		}
     }
   }
 });
 
+const Mutation = new GraphQLObjectType({
+	name: 'Mutation',
+	fields: {
+		addRoot: {
+			type:  RootType,
+			args: {
+				root: { type: new GraphQLNonNull(GraphQLString) },
+				number: { type: new GraphQLNonNull(GraphQLInt) },
+				salish: { type: new GraphQLNonNull(GraphQLString)},
+				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
+				english: { type: new GraphQLNonNull(GraphQLString)},
+			},
+			resolve(parent,args){
+				let root = new Root({
+					root: args.root,
+					number: args.number,
+					salish: args.salish,
+					nicodemus: args.nicodemus,
+					english: args.english
+				});
+				return root.save();
+			}
+		},
+		addUser: {
+			type: UserType,
+			args: {
+				first: { type: new GraphQLNonNull(GraphQLString) },
+				last: { type: new GraphQLNonNull(GraphQLString) },
+				username: { type: new GraphQLNonNull(GraphQLString) },
+				email: { type: new GraphQLNonNull(GraphQLString) },
+				password: { type: new GraphQLNonNull(GraphQLString) },
+				roles: { type: new GraphQLNonNull(GraphQLString) }
+				},
+			resolve(parent,args){
+				let user = new User ({
+					first: args.first,
+					last: args.last,
+					username: args.username,
+					email: args.email,
+					password: args.password,
+					roles: args.roles
+				});
+				return user.save();
+			}
+		}
+	}
+})
 module.exports = new GraphQLSchema({
-  query: RootQuery
+  query: BaseQuery,
+  mutation: Mutation
 });
