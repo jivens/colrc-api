@@ -121,6 +121,40 @@ const Mutation = new GraphQLObjectType({
 				return root.save();
 			}
 		},
+    deleteRoot: {
+      type: RootType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve(parent,args) {
+        return Root.destroy({ where: { id: args.id } });
+      }
+    },
+    updateRoot: {
+      type: RootType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        root: { type: new GraphQLNonNull(GraphQLString) },
+        number: { type: new GraphQLNonNull(GraphQLInt) },
+        salish: { type: new GraphQLNonNull(GraphQLString)},
+        nicodemus: { type: new GraphQLNonNull(GraphQLString)},
+        english: { type: new GraphQLNonNull(GraphQLString)}
+      },
+      resolve(parent,args) {
+        return Root.update(
+          { root: args.root,
+            number: args.number,
+            salish: args.salish,
+            nicodemus: args.nicodemus,
+            english: args.english
+          },
+          {returning: true, where: {id: args.id} }
+        );
+        // .then(function([ rowsUpdated, [updatedRoot] ]) {
+        //   return(updatedRoot);
+        // });
+      }
+    },
 		addUser: {
 			type: UserType,
 			args: {
