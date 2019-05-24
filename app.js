@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 
 app.use('/api', graphqlHTTP({
-  schema: schema
-  //graphiql: true
+  schema: schema,
+  graphiql: true
 }));
 
 app.listen(4000, () => {
