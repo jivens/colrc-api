@@ -11,7 +11,8 @@ const {
 //const _ = require('lodash');
 const { // define mysql connectors
   Root,
-  User
+  User,
+  Affix
 } = require('../connectors/mysqlDB');
 
 const staticServerAddress = "http://lasrv01.ipfw.edu/";
@@ -65,6 +66,19 @@ const UserType = new GraphQLObjectType({
   })
 });
 
+const AffixType = new GraphQLObjectType({
+  name: 'Affix',
+  fields: () => ({
+    id: { type: GraphQLID },
+    type: { type: GraphQLString },
+    salish: { type: GraphQLString },
+    nicodemus: { type: GraphQLString },
+    english: { type: GraphQLString },
+    link: { type: GraphQLString },
+    page: { type: GraphQLString }
+  })
+});
+
 const BaseQuery = new GraphQLObjectType({
   name: 'BaseQueryType',
   fields: {
@@ -82,6 +96,13 @@ const BaseQuery = new GraphQLObjectType({
         return User.findOne({ where: { id: args.id } });
       }
     },
+    affix: {
+      type: AffixType,
+      args: { id: {type: GraphQLID } },
+      resolve(parent, args) {
+        return Affix.findOne({ where: { id: args.id } });
+      }
+    },
     roots: {
       type: new GraphQLList(RootType),
       resolve(parent, args) {
@@ -91,8 +112,13 @@ const BaseQuery = new GraphQLObjectType({
     users: {
       type: new GraphQLList(UserType),
       resolve(parent, args) {
-        //return authors;
         return User.findAll({});
+      }
+    },
+    affixes: {
+      type: new GraphQLList(AffixType),
+      resolve(parent, args) {
+        return Affix.findAll({});
       }
     }
   }
