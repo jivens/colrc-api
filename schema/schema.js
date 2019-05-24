@@ -127,6 +127,64 @@ const BaseQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
 	name: 'Mutation',
 	fields: {
+		addAffix: {
+			type:  AffixType,
+			args: {
+				type: { type: new GraphQLNonNull(GraphQLString) },
+				salish: { type: new GraphQLNonNull(GraphQLString)},
+				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
+				english: { type: new GraphQLNonNull(GraphQLString)},
+				link: { type: new GraphQLNonNull(GraphQLString)},
+				page: { type: new GraphQLNonNull(GraphQLString)},
+			},
+			resolve(parent,args){
+				let affix = new Affix({
+					type: args.type,
+					salish: args.salish,
+					nicodemus: args.nicodemus,
+					english: args.english,
+					link: args.link,
+					page: args.page
+				});
+				return affix.save();
+			}
+		},
+    deleteAffix: {
+      type: AffixType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve(parent,args) {
+        return Affix.destroy({ where: { id: args.id } });
+      }
+    },
+    updateAffix: {
+      type: AffixType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        type: { type: new GraphQLNonNull(GraphQLString) },
+        salish: { type: new GraphQLNonNull(GraphQLString)},
+        nicodemus: { type: new GraphQLNonNull(GraphQLString)},
+        english: { type: new GraphQLNonNull(GraphQLString)},
+        link: { type: new GraphQLNonNull(GraphQLString)},
+        page: { type: new GraphQLNonNull(GraphQLString)},
+      },
+      resolve(parent,args) {
+        return Affix.update(
+          { type: args.type,
+            salish: args.salish,
+            nicodemus: args.nicodemus,
+            english: args.english,
+            link: args.link,
+            page: args.page
+          },
+          {returning: true, where: {id: args.id} }
+        );
+        // .then(function([ rowsUpdated, [updatedRoot] ]) {
+        //   return(updatedRoot);
+        // });
+      }
+    },
 		addRoot: {
 			type:  RootType,
 			args: {
