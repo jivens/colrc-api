@@ -12,7 +12,8 @@ const {
 const { // define mysql connectors
   Root,
   User,
-  Affix
+  Affix,
+  Stem
 } = require('../connectors/mysqlDB');
 
 const staticServerAddress = "http://lasrv01.ipfw.edu/";
@@ -37,13 +38,13 @@ const RootType = new GraphQLObjectType({
     number: { type: GraphQLInt },
     salish: { type: GraphQLString },
     nicodemus: { type: GraphQLString },
-    english: { type: GraphQLString }
-    // user: {
-    //   type: UserType,
-    //   resolve(parent, args) {
-    //     return _.find(users, { id: parent.userId });
-    //   }
-    // }
+    english: { type: GraphQLString },
+    user: {
+      type: UserType,
+      resolve(parent, args) {
+        return User.findOne({ where: { id: parent.userId } });
+      }
+    }
   })
 });
 
@@ -79,6 +80,22 @@ const AffixType = new GraphQLObjectType({
   })
 });
 
+const StemType = new GraphQLObjectType({
+  name: 'Stem',
+  fields: () => ({
+    id: { type: GraphQLID },
+    category: { type: GraphQLString },
+    reichard: { type: GraphQLString },
+    doak: { type: GraphQLString },
+    salish: { type: GraphQLString },
+    nicodemus: { type: GraphQLString },
+    english: { type: GraphQLString },
+    note: { type: GraphQLString },
+  })
+});
+
+
+
 const BaseQuery = new GraphQLObjectType({
   name: 'BaseQueryType',
   fields: {
@@ -103,6 +120,13 @@ const BaseQuery = new GraphQLObjectType({
         return Affix.findOne({ where: { id: args.id } });
       }
     },
+    stem: {
+      type: StemType,
+      args: { id: {type: GraphQLID } },
+      resolve(parent, args) {
+        return Stem.findOne({ where: { id: args.id } });
+      }
+    },
     roots: {
       type: new GraphQLList(RootType),
       resolve(parent, args) {
@@ -120,6 +144,12 @@ const BaseQuery = new GraphQLObjectType({
       resolve(parent, args) {
         return Affix.findAll({});
       }
+    },
+    stems: {
+      type: new GraphQLList(StemType),
+      resolve(parent, args) {
+        return Stem.findAll({});
+      }
     }
   }
 });
@@ -127,6 +157,69 @@ const BaseQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
 	name: 'Mutation',
 	fields: {
+    addStem: {
+			type:  StemType,
+			args: {
+				category: { type: new GraphQLNonNull(GraphQLString) },
+        reichard: { type: new GraphQLNonNull(GraphQLString)},
+        doak: { type: new GraphQLNonNull(GraphQLString)},
+        salish: { type: new GraphQLNonNull(GraphQLString)},
+				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
+				english: { type: new GraphQLNonNull(GraphQLString)},
+				note: { type: new GraphQLNonNull(GraphQLString)},
+      },
+			resolve(parent,args){
+				let stem = new Stem({
+          category: args.category,
+          reichard: args.reichard,
+          doak: args.doke,
+					salish: args.salish,
+					nicodemus: args.nicodemus,
+					english: args.english,
+					note: args.note,
+				});
+				return stem.save();
+			}
+		},
+    deleteStem: {
+      type: StemType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve(parent,args) {
+        return Stem.destroy({ where: { id: args.id } });
+      }
+    },
+    updateStem: {
+      type: StemType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        category: { type: new GraphQLNonNull(GraphQLString) },
+        reichard: { type: new GraphQLNonNull(GraphQLString)},
+        doak: { type: new GraphQLNonNull(GraphQLString)},
+        salish: { type: new GraphQLNonNull(GraphQLString)},
+				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
+				english: { type: new GraphQLNonNull(GraphQLString)},
+				note: { type: new GraphQLNonNull(GraphQLString)},
+      },
+      resolve(parent,args) {
+        return Stem.update(
+          { category: args.category,
+            reichard: args.reichard,
+            doak: args.doke,
+            salish: args.salish,
+            nicodemus: args.nicodemus,
+            english: args.english,
+            note: args.note,
+          },
+          {returning: true, where: {id: args.id} }
+        );
+        // .then(function([ rowsUpdated, [updatedRoot] ]) {
+        //   return(updatedRoot);
+        // });
+      }
+    },
+
 		addAffix: {
 			type:  AffixType,
 			args: {

@@ -39,7 +39,8 @@ const Root = sequelize.define('root', {
   number: { type: Sequelize.INTEGER },
   salish: { type: Sequelize.STRING },
   nicodemus: { type: Sequelize.STRING },
-  english: { type: Sequelize.STRING }
+  english: { type: Sequelize.STRING },
+  userId: { type: Sequelize.STRING }
 },
 {
   charset: 'utf8mb4',
@@ -72,6 +73,19 @@ const Affix = sequelize.define('affix', {
   collate: 'utf8mb4_unicode_ci'
 });
 
+const Stem = sequelize.define('stem', {
+  category: { type: Sequelize.STRING },
+  reichard: { type: Sequelize.STRING },
+  doak: { type: Sequelize.STRING },
+  salish: { type: Sequelize.STRING },
+  nicodemus: { type: Sequelize.STRING },
+  english: { type: Sequelize.STRING },
+  note: { type: Sequelize.STRING },
+},
+{
+  charset: 'utf8mb4',
+  collate: 'utf8mb4_unicode_ci'
+});
 
 // force: true will drop the table if it already exists
 // Book
@@ -109,6 +123,7 @@ const Affix = sequelize.define('affix', {
 
 module.exports = {
   Root,
-  User, 
-  Affix
+  User,
+  Affix,
+  Stem
 };
