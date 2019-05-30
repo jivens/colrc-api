@@ -155,7 +155,6 @@ const BaseQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
 	name: 'Mutation',
 	fields: {
-<<<<<<< HEAD
 		addStem: {
 			type:  StemType,
 			args: {
