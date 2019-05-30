@@ -39,7 +39,8 @@ const Root = sequelize.define('root', {
   number: { type: Sequelize.INTEGER },
   salish: { type: Sequelize.STRING },
   nicodemus: { type: Sequelize.STRING },
-  english: { type: Sequelize.STRING }
+  english: { type: Sequelize.STRING },
+  userId: { type: Sequelize.STRING }
 },
 {
   charset: 'utf8mb4',
@@ -122,7 +123,7 @@ const Stem = sequelize.define('stem', {
 
 module.exports = {
   Root,
-  User, 
+  User,
   Affix,
   Stem
 };

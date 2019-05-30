@@ -38,13 +38,13 @@ const RootType = new GraphQLObjectType({
     number: { type: GraphQLInt },
     salish: { type: GraphQLString },
     nicodemus: { type: GraphQLString },
-    english: { type: GraphQLString }
-    // user: {
-    //   type: UserType,
-    //   resolve(parent, args) {
-    //     return _.find(users, { id: parent.userId });
-    //   }
-    // }
+    english: { type: GraphQLString },
+    user: {
+      type: UserType,
+      resolve(parent, args) {
+        return User.findOne({ where: { id: parent.userId } });
+      }
+    }
   })
 });
 
@@ -80,19 +80,18 @@ const AffixType = new GraphQLObjectType({
   })
 });
 
-
 const StemType = new GraphQLObjectType({
-	name: 'Stem',
-	fields: () => ({
-		id: { type: GraphQLID },
-		category: { type: GraphQLString },
-		reichard: { type: GraphQLString },
-		doak: { type: GraphQLString },
-		salish: { type: GraphQLString },
-		nicodemus: { type: GraphQLString },
-		english: { type: GraphQLString },
-		note: { type: GraphQLString },
-	})
+  name: 'Stem',
+  fields: () => ({
+    id: { type: GraphQLID },
+    category: { type: GraphQLString },
+    reichard: { type: GraphQLString },
+    doak: { type: GraphQLString },
+    salish: { type: GraphQLString },
+    nicodemus: { type: GraphQLString },
+    english: { type: GraphQLString },
+    note: { type: GraphQLString },
+  })
 });
 
 const BaseQuery = new GraphQLObjectType({
@@ -156,6 +155,7 @@ const BaseQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
 	name: 'Mutation',
 	fields: {
+<<<<<<< HEAD
 		addStem: {
 			type:  StemType,
 			args: {
