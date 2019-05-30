@@ -3,6 +3,8 @@
 // Also utilizes Sequelize
 // github - AmitXShukla
 
+1555246c3394dc394cc2c84403be949a13097e1e
+
 // MERN - MySQL + Express + React + NodeJS - Login
 
 // Authentication and Error Handling in GraphQL - Andrew Rhyne

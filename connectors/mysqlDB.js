@@ -40,6 +40,8 @@ const Root = sequelize.define('root', {
   salish: { type: Sequelize.STRING },
   nicodemus: { type: Sequelize.STRING },
   english: { type: Sequelize.STRING },
+  active: { type: Sequelize.STRING(1) },
+  prevId: { type: Sequelize.INTEGER },
   userId: { type: Sequelize.STRING }
 },
 {
@@ -59,6 +61,8 @@ const User = sequelize.define('user', {
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci'
 });
+
+Root.belongsTo(User, { foreignKey: 'userId' });
 
 const Affix = sequelize.define('affix', {
   type: { type: Sequelize.STRING },

@@ -39,6 +39,8 @@ const RootType = new GraphQLObjectType({
     salish: { type: GraphQLString },
     nicodemus: { type: GraphQLString },
     english: { type: GraphQLString },
+    active: { type: GraphQLString },
+    prevId: { type: GraphQLInt },
     user: {
       type: UserType,
       resolve(parent, args) {
@@ -128,7 +130,7 @@ const BaseQuery = new GraphQLObjectType({
     roots: {
       type: new GraphQLList(RootType),
       resolve(parent, args) {
-        return Root.findAll({});
+        return Root.findAll({ limit: 100 });
       }
     },
     users: {
@@ -283,6 +285,7 @@ const Mutation = new GraphQLObjectType({
 				salish: { type: new GraphQLNonNull(GraphQLString)},
 				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
 				english: { type: new GraphQLNonNull(GraphQLString)},
+        userId: { type: new GraphQLNonNull(GraphQLInt) }
 			},
 			resolve(parent,args){
 				let root = new Root({
@@ -290,7 +293,10 @@ const Mutation = new GraphQLObjectType({
 					number: args.number,
 					salish: args.salish,
 					nicodemus: args.nicodemus,
-					english: args.english
+					english: args.english,
+          active: 'Y',
+          // prevId set to NULL by default
+          userId: args.userId
 				});
 				return root.save();
 			}
@@ -301,7 +307,13 @@ const Mutation = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(parent,args) {
-        return Root.destroy({ where: { id: args.id } });
+        //return Root.destroy({ where: { id: args.id } });
+        return Root.update(
+          {
+            active: 'N'
+          },
+          {returning: true, where: {id: args.id} }
+        );
       }
     },
     updateRoot: {
@@ -312,18 +324,27 @@ const Mutation = new GraphQLObjectType({
         number: { type: new GraphQLNonNull(GraphQLInt) },
         salish: { type: new GraphQLNonNull(GraphQLString)},
         nicodemus: { type: new GraphQLNonNull(GraphQLString)},
-        english: { type: new GraphQLNonNull(GraphQLString)}
+        english: { type: new GraphQLNonNull(GraphQLString)},
+        userId: { type: new GraphQLNonNull(GraphQLInt) }
       },
       resolve(parent,args) {
-        return Root.update(
-          { root: args.root,
-            number: args.number,
-            salish: args.salish,
-            nicodemus: args.nicodemus,
-            english: args.english
+        Root.update(
+          {
+            active: 'N'
           },
           {returning: true, where: {id: args.id} }
         );
+        let root = new Root({
+          root: args.root,
+          number: args.number,
+          salish: args.salish,
+          nicodemus: args.nicodemus,
+          english: args.english,
+          active: 'Y',
+          prevId: args.id,
+          userId: args.userId
+        });
+        return root.save();
         // .then(function([ rowsUpdated, [updatedRoot] ]) {
         //   return(updatedRoot);
         // });
