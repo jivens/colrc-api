@@ -71,11 +71,16 @@ const Affix = sequelize.define('affix', {
   english: { type: Sequelize.STRING },
   link: { type: Sequelize.STRING },
   page: { type: Sequelize.STRING },
+  active: { type: Sequelize.STRING(1) },
+  prevId: { type: Sequelize.INTEGER },
+  userId: { type: Sequelize.STRING }
 },
 {
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci'
 });
+
+Affix.belongsTo(User, { foreignKey: 'userId' });
 
 const Stem = sequelize.define('stem', {
   category: { type: Sequelize.STRING },

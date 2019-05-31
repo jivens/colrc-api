@@ -78,7 +78,15 @@ const AffixType = new GraphQLObjectType({
     nicodemus: { type: GraphQLString },
     english: { type: GraphQLString },
     link: { type: GraphQLString },
-    page: { type: GraphQLString }
+    page: { type: GraphQLString },
+    active: { type: GraphQLString },
+    prevId: { type: GraphQLInt },
+    user: {
+      type: UserType,
+      resolve(parent, args) {
+        return User.findOne({ where: { id: parent.userId } });
+      }
+    }
   })
 });
 
@@ -130,7 +138,8 @@ const BaseQuery = new GraphQLObjectType({
     roots: {
       type: new GraphQLList(RootType),
       resolve(parent, args) {
-        return Root.findAll({ limit: 100 });
+        //return Root.findAll({ limit: 100 });
+        return Root.findAll({});
       }
     },
     users: {
@@ -166,7 +175,7 @@ const Mutation = new GraphQLObjectType({
 				salish: { type: new GraphQLNonNull(GraphQLString)},
 				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
 				english: { type: new GraphQLNonNull(GraphQLString)},
-				note: { type: new GraphQLNonNull(GraphQLString)}
+				note: { type: new GraphQLNonNull(GraphQLString)},
 			},
 			resolve(parent,args){
 				let stem = new Stem({
@@ -228,6 +237,7 @@ const Mutation = new GraphQLObjectType({
 				english: { type: new GraphQLNonNull(GraphQLString)},
 				link: { type: new GraphQLNonNull(GraphQLString)},
 				page: { type: new GraphQLNonNull(GraphQLString)},
+				userId: { type: new GraphQLNonNull(GraphQLInt) },
 			},
 			resolve(parent,args){
 				let affix = new Affix({
@@ -236,20 +246,29 @@ const Mutation = new GraphQLObjectType({
 					nicodemus: args.nicodemus,
 					english: args.english,
 					link: args.link,
-					page: args.page
+					page: args.page,
+					active: 'Y',
+					userId: args.userId
 				});
 				return affix.save();
 			}
 		},
+
     deleteAffix: {
       type: AffixType,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(parent,args) {
-        return Affix.destroy({ where: { id: args.id } });
+        return Affix.update(
+        	{ 
+        		active: 'N'
+        	},
+        	{ returning: true, where: { id: args.id } }
+        );
       }
     },
+
     updateAffix: {
       type: AffixType,
       args: {
@@ -260,23 +279,30 @@ const Mutation = new GraphQLObjectType({
         english: { type: new GraphQLNonNull(GraphQLString)},
         link: { type: new GraphQLNonNull(GraphQLString)},
         page: { type: new GraphQLNonNull(GraphQLString)},
+        userId: { type: new GraphQLNonNull(GraphQLInt)},
       },
       resolve(parent,args) {
-        return Affix.update(
-          { type: args.type,
+      	return Affix.update(
+        	{ 
+        		active: 'N'
+        	},
+        	{ returning: true, where: { id: args.id } }
+        );
+        let affix = new Affix({
+          	type: args.type,
             salish: args.salish,
             nicodemus: args.nicodemus,
             english: args.english,
             link: args.link,
-            page: args.page
-          },
-          {returning: true, where: {id: args.id} }
-        );
-        // .then(function([ rowsUpdated, [updatedRoot] ]) {
-        //   return(updatedRoot);
-        // });
-      }
+            page: args.page,
+   	        active: 'Y',
+			prevId: args.id,
+			userId: args.userId
+		});
+			return affix.save();
+		}
     },
+
 		addRoot: {
 			type:  RootType,
 			args: {
@@ -285,8 +311,8 @@ const Mutation = new GraphQLObjectType({
 				salish: { type: new GraphQLNonNull(GraphQLString)},
 				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
 				english: { type: new GraphQLNonNull(GraphQLString)},
-        userId: { type: new GraphQLNonNull(GraphQLInt) }
-			},
+        		userId: { type: new GraphQLNonNull(GraphQLInt) }
+				},
 			resolve(parent,args){
 				let root = new Root({
 					root: args.root,
@@ -294,9 +320,8 @@ const Mutation = new GraphQLObjectType({
 					salish: args.salish,
 					nicodemus: args.nicodemus,
 					english: args.english,
-          active: 'Y',
-          // prevId set to NULL by default
-          userId: args.userId
+			        active: 'Y',
+			        userId: args.userId
 				});
 				return root.save();
 			}
