@@ -101,6 +101,14 @@ const StemType = new GraphQLObjectType({
     nicodemus: { type: GraphQLString },
     english: { type: GraphQLString },
     note: { type: GraphQLString },
+    active: { type: GraphQLString },
+    prevId: { type: GraphQLInt },
+    user: {
+      type: UserType,
+      resolve(parent, args) {
+        return User.findOne({ where: { id: parent.userId } });
+      }
+    }
   })
 });
 
@@ -175,8 +183,9 @@ const Mutation = new GraphQLObjectType({
 				salish: { type: new GraphQLNonNull(GraphQLString)},
 				nicodemus: { type: new GraphQLNonNull(GraphQLString)},
 				english: { type: new GraphQLNonNull(GraphQLString)},
-				note: { type: new GraphQLNonNull(GraphQLString)},
-			},
+        note: { type: new GraphQLNonNull(GraphQLString)},
+        userId: { type: new GraphQLNonNull(GraphQLInt) },
+      },
 			resolve(parent,args){
 				let stem = new Stem({
 					category: args.category,
@@ -185,47 +194,75 @@ const Mutation = new GraphQLObjectType({
 					salish: args.salish,
 					nicodemus: args.nicodemus,
 					english: args.english,
-					note: args.note
+          			note: args.note,
+          			active: 'Y',
+         			userId: args.userId
 				});
 				return stem.save();
 			}
-		},
+    },
+    // deleteRoot: {
+    //   type: RootType,
+    //   args: {
+    //     id: { type: new GraphQLNonNull(GraphQLID) }
+    //   },
+    //   resolve(parent,args) {
+    //     return Root.update(
+    //       {
+    //         active: 'N'
+    //       },
+    //       {returning: true, where: {id: args.id} }
+    //     );
+    //   }
+    // },
     deleteStem: {
       type: StemType,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(parent,args) {
-        return Stem.destroy({ where: { id: args.id } });
+        return Stem.update(
+          { 
+            active: 'N'
+           },
+           {returning: true, where: { id: args.id } }
+        );
       }
     },
     updateStem: {
       type: StemType,
       args: {
-	  	id: { type: new GraphQLNonNull(GraphQLID) },
-		category: { type: new GraphQLNonNull(GraphQLString) },
-		reichard: { type: new GraphQLNonNull(GraphQLString) },
-		doak: { type: new GraphQLNonNull(GraphQLString) },
-		salish: { type: new GraphQLNonNull(GraphQLString)},
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        category: { type: new GraphQLNonNull(GraphQLString) },
+        reichard: { type: new GraphQLNonNull(GraphQLString)},
+        doak: { type: new GraphQLNonNull(GraphQLString)},
+        salish: { type: new GraphQLNonNull(GraphQLString)},
 		nicodemus: { type: new GraphQLNonNull(GraphQLString)},
 		english: { type: new GraphQLNonNull(GraphQLString)},
-		note: { type: new GraphQLNonNull(GraphQLString)}
+        note: { type: new GraphQLNonNull(GraphQLString)},
+        userId: { type: new GraphQLNonNull(GraphQLInt) }
       },
       resolve(parent,args) {
-        return Stem.update(
-          { category: args.category,
-			reichard: args.reichard,
-			doak: args.doak,
-			salish: args.salish,
-			nicodemus: args.nicodemus,
-			english: args.english,
-			note: args.note
+        Stem.update(
+          {
+            active: 'N'
           },
-          {returning: true, where: {id: args.id} }
+          {returning: true, where: {id: args.id}
+          }
         );
-        // .then(function([ rowsUpdated, [updatedRoot] ]) {
-        //   return(updatedRoot);
-        // });
+        let stem = new Stem({
+            category: args.category,
+            reichard: args.reichard,
+            doak: args.doke,
+            salish: args.salish,
+            nicodemus: args.nicodemus,
+            english: args.english,
+            note: args.note,
+            active: 'Y',
+            prevId: args.id,
+            userId: args.userId
+          });
+          return stem.save();
       }
     },
 		addAffix: {
