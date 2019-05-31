@@ -85,11 +85,16 @@ const Stem = sequelize.define('stem', {
   nicodemus: { type: Sequelize.STRING },
   english: { type: Sequelize.STRING },
   note: { type: Sequelize.STRING },
+  active: { type: Sequelize.STRING(1) },
+  prevId: { type: Sequelize.INTEGER },
+  userId: { type: Sequelize.STRING }
 },
 {
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci'
 });
+
+Stem.belongsTo(User, { foreignKey: 'userId' });
 
 // force: true will drop the table if it already exists
 // Book
