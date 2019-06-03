@@ -297,12 +297,14 @@ const Mutation = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(parent,args) {
-        return Affix.update(
-        	{ 
-        		active: 'N'
-        	},
-        	{ returning: true, where: { id: args.id } }
-        );
+      	return Affix.findOne({ where: { id: args.id} })
+      	.then( affix => {
+      		affix.active = 'N';
+	        return affix.save();
+		}) 
+		.catch(err => {
+			return err;
+		});
       }
     },
 
@@ -319,7 +321,7 @@ const Mutation = new GraphQLObjectType({
         userId: { type: new GraphQLNonNull(GraphQLInt)},
       },
       resolve(parent,args) {
-      	return Affix.update(
+      	Affix.update(
         	{ 
         		active: 'N'
         	},
