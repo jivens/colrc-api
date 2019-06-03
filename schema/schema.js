@@ -220,13 +220,15 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
-      resolve(parent,args) {
-        return Stem.update(
-          { 
-            active: 'N'
-           },
-           {returning: true, where: { id: args.id } }
-        );
+     resolve(parent,args) {
+      	return Stem.findOne({ where: { id: args.id} })
+      	.then( stem => {
+      		stem.active = 'N';
+	        return stem.save();
+		}) 
+		.catch(err => {
+			return err;
+		});
       }
     },
     updateStem: {
@@ -370,16 +372,18 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
-      resolve(parent,args) {
-        //return Root.destroy({ where: { id: args.id } });
-        return Root.update(
-          {
-            active: 'N'
-          },
-          {returning: true, where: {id: args.id} }
-        );
+    	resolve(parent,args) {
+      	return Root.findOne({ where: { id: args.id} })
+      	.then( root => {
+      		root.active = 'N';
+	        return root.save();
+    		}) 
+    		.catch(err => {
+    			return err;
+    		});
       }
     },
+
     updateRoot: {
       type: RootType,
       args: {
