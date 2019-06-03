@@ -13,7 +13,8 @@ const { // define mysql connectors
   Root,
   User,
   Affix,
-  Stem
+  Stem,
+  sequelize
 } = require('../connectors/mysqlDB');
 
 const staticServerAddress = "http://lasrv01.ipfw.edu/";
@@ -225,7 +226,7 @@ const Mutation = new GraphQLObjectType({
       	.then( stem => {
       		stem.active = 'N';
 	        return stem.save();
-		}) 
+		})
 		.catch(err => {
 			return err;
 		});
@@ -303,7 +304,7 @@ const Mutation = new GraphQLObjectType({
       	.then( affix => {
       		affix.active = 'N';
 	        return affix.save();
-		}) 
+		})
 		.catch(err => {
 			return err;
 		});
@@ -323,25 +324,34 @@ const Mutation = new GraphQLObjectType({
         userId: { type: new GraphQLNonNull(GraphQLInt)},
       },
       resolve(parent,args) {
-      	Affix.update(
-        	{ 
-        		active: 'N'
-        	},
-        	{ returning: true, where: { id: args.id } }
-        );
-        let affix = new Affix({
-          	type: args.type,
-            salish: args.salish,
-            nicodemus: args.nicodemus,
-            english: args.english,
-            link: args.link,
-            page: args.page,
-   	        active: 'Y',
-			prevId: args.id,
-			userId: args.userId
-		});
-			return affix.save();
-		}
+        sequelize.transaction(t => {
+
+          return Affix.findOne({ where: { id: args.id}, transaction: t })
+          .then( affix => {
+            // Found an affix, now 'delete' it
+            affix.active = 'N';
+            return affix.save({transaction: t});
+          })
+          .then( affix => {
+            // 'deleted' the old affix, now add the new affix
+            let newAffix = new Affix({
+              	type: args.type,
+                salish: args.salish,
+                nicodemus: args.nicodemus,
+                english: args.english,
+                link: args.link,
+                page: args.page,
+       	        active: 'Y',
+    			      prevId: args.id,
+    			      userId: args.userId
+    		    });
+    			  return newAffix.save({transaction: t});
+          })
+          .catch(err => {
+            return err;
+          });
+        });
+      }
     },
 
 		addRoot: {
@@ -377,7 +387,7 @@ const Mutation = new GraphQLObjectType({
       	.then( root => {
       		root.active = 'N';
 	        return root.save();
-    		}) 
+    		})
     		.catch(err => {
     			return err;
     		});

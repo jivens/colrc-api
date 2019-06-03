@@ -139,5 +139,6 @@ module.exports = {
   Root,
   User,
   Affix,
-  Stem
+  Stem,
+  sequelize
 };
