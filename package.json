@@ -26,6 +26,6 @@
     "lodash": "^4.17.11",
     "mysql2": "^1.6.5",
     "nodemon": "^1.18.10",
-    "sequelize": "^5.8.6"
+    "sequelize": "^5.15.1"
   }
 }
